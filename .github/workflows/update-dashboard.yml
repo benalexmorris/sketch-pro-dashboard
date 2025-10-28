@@ -1,0 +1,36 @@
+name: Update Dashboard from Excel
+
+# This workflow runs when you push changes to the Excel file
+on:
+  push:
+    paths:
+      - 'Sketch-Pro-data-multimarket.xlsx'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        pip install pandas openpyxl
+        
+    - name: Run update script
+      run: |
+        python update_dashboard.py
+        
+    - name: Commit and push if changed
+      run: |
+        git config --global user.name 'Dashboard Bot'
+        git config --global user.email 'bot@sketchpro.com'
+        git add index.html
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-update dashboard from Excel" && git push)
